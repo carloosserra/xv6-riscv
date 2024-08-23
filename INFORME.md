@@ -6,8 +6,9 @@
 2- Crear la rama tarea-0.
 ![alt text](image-1.png)
 3- Hacer checkout para trabajar con esta rama.
-4- Instalar Toolchain junto a todas las dependencias necesarias como QEMU.
+4- Instalar Toolchain junto a todas las dependencias necesarias, apoyandome de la documentacion de la siguiente pagina: https://pdos.csail.mit.edu/6.828/2019/tools.html.
 5- Usar los comandos "make" y luego "make qemu" para ejecutar xv6.
+6- crear esta archivo para documentar la informacion solicitada para luago hacer el puch con los comandos "git add .", "git commit -m "tarea-0"" y finalmente "git push --set-upstream origin tarea-0" para hacer el push y que se creer la rama en el repositorio de github. 
 
 ## Problemas encontrados y soluciones
 
