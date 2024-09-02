@@ -5,6 +5,8 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "syscall.h"
+
 
 uint64
 sys_exit(void)
@@ -19,6 +21,35 @@ uint64
 sys_getpid(void)
 {
   return myproc()->pid;
+}
+// --------------------------------------------------------------
+uint64
+sys_getppid(void)
+{
+  return  myproc()->parent->pid;
+}
+
+uint64
+sys_getancestor(void)
+{
+  int n;
+  struct proc *p = myproc();
+  
+  // Obtener el parámetro n de la syscall
+  argint(0, &n);
+  
+  // Validar el parámetro n
+  if (n < 0)
+    return -1;
+
+  // Recorrer la cadena de ancestros
+  for(int i = 0; i < n; i++) {
+    if(p->parent == 0) // Si no hay más ancestros
+      return -1;
+    p = p->parent;
+  }
+  
+  return p->pid;
 }
 
 uint64
