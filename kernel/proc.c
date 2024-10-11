@@ -124,6 +124,10 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+   // Inicializar prioridad y boost
+  p->priority = 0; // Inicializar prioridad en 0 (menor número = mayor prioridad)
+  p->boost = 1;    // Inicializar boost en 1
+
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -458,6 +462,17 @@ scheduler(void)
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if(p->state == RUNNABLE) {
+        // Actualizar la prioridad y el boost de los procesos RUNNABLE
+        p->priority += p->boost;
+
+        // Cambiar el boost según la prioridad
+        if (p->priority >= 9) {
+          p->boost = -1; // Disminuir la prioridad si alcanza 9
+        }
+        if (p->priority <= 0) {
+          p->boost = 1;  // Aumentar la prioridad si alcanza 0
+        }
+
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
@@ -472,6 +487,7 @@ scheduler(void)
       }
       release(&p->lock);
     }
+
     if(found == 0) {
       // nothing to run; stop running on this core until an interrupt.
       intr_on();
@@ -479,6 +495,7 @@ scheduler(void)
     }
   }
 }
+
 
 // Switch to scheduler.  Must hold only p->lock
 // and have changed proc->state. Saves and restores
@@ -505,17 +522,37 @@ sched(void)
   intena = mycpu()->intena;
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
+
 }
 
 // Give up the CPU for one scheduling round.
 void
-yield(void)
-{
+yield(void) {
   struct proc *p = myproc();
   acquire(&p->lock);
   p->state = RUNNABLE;
   sched();
   release(&p->lock);
+}
+
+int getpriority(int pid) {
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++) {
+    if(p->pid == pid) {
+      return p->priority;
+    }
+  }
+  return -1; // Si no se encuentra el proceso
+}
+
+int getboost(int pid) {
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++) {
+    if(p->pid == pid) {
+      return p->boost;
+    }
+  }
+  return -1; // Si no se encuentra el proceso
 }
 
 // A fork child's very first scheduling by scheduler()

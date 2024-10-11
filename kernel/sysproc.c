@@ -36,6 +36,27 @@ sys_wait(void)
 }
 
 uint64
+sys_getpriority(void)
+{
+  int pid;
+  argint(0, &pid);
+  if(pid < 0)
+    return -1;
+  return getpriority(pid);
+}
+
+// sys_getboost
+uint64
+sys_getboost(void)
+{
+  int pid;
+  argint(0, &pid);
+  if(pid < 0)
+    return -1;
+  return getboost(pid);
+}
+
+uint64
 sys_sbrk(void)
 {
   uint64 addr;
