@@ -1,21 +1,21 @@
 # INFORME TAREA 2 CARLOS SERRA
 ## Documentación Tarea 2
 
-1. ### Investigación preliminar
-    Se investigó la ubicación del ```scheduler``` dentro del sistema operativo y finalmente se encontró en la carpeta ```kernel```, específicamente en el archivo ```proc.c```. Dentro de este archivo, el ```scheduler``` está implementado en un bloque de código llamado ```scheduler(void)```.
+### 1. Investigación preliminar
+Se investigó la ubicación del ```scheduler``` dentro del sistema operativo y finalmente se encontró en la carpeta ```kernel```, específicamente en el archivo ```proc.c```. Dentro de este archivo, el ```scheduler``` está implementado en un bloque de código llamado ```scheduler(void)```.
 
-2. ### Incorporar Prioridad y Boost
-    En una segunda etapa de investigación para implementar la funcionalidad de **Prioridad** y **Boost**, se identificó la necesidad de modificar la estructura ```proc``` en el archivo ```proc.h```. Esta modificación permitirá incorporar ambos campos a la estructura de cada proceso, facilitando su manejo dentro del sistema operativo. (107-108)
+### 2. Incorporar Prioridad y Boost
+En una segunda etapa de investigación para implementar la funcionalidad de **Prioridad** y **Boost**, se identificó la necesidad de modificar la estructura ```proc``` en el archivo ```proc.h```. Esta modificación permitirá incorporar ambos campos a la estructura de cada proceso, facilitando su manejo dentro del sistema operativo. (107-108)
  
-    ``` 
+     
     struct proc {
     ...
     int priority; // Campo de prioridad
     int boost;    // Campo de boost
     };
-    ``````
-    Seguido a esto, en el archivo ```proc.c```, dentro de la función ```allocproc```, se establecen los valores iniciales de ambos campos para cada proceso recién creado. (127-130)
-    ```
+    
+Seguido a esto, en el archivo ```proc.c```, dentro de la función ```allocproc```, se establecen los valores iniciales de ambos campos para cada proceso recién creado. (127-130)
+    
     static struct proc*
     allocproc(void)
     {
@@ -28,10 +28,11 @@
         ...
     };
 
-    ``````
-3. ### Implementar Lógica de Prioridad con Boost
-    Posteriormente en el archivo `proc.c` , se estableció la lógica de **Prioridad** y **Boost** en la función `scheduler(void)`, en donde inicialmente establecemos la variable  `high_p` para guardar el proceso con mayor prioridad. para luego implementar la lógica `Prioridad += Boost` y si la `Prioridad = 9` entonces `Boost = -1` y si `Prioridad = 0`, entonces `Boost = -1`. (451-499)
-    ```
+    
+
+### 3. Implementar Lógica de Prioridad con Boost
+Posteriormente en el archivo `proc.c` , se estableció la lógica de **Prioridad** y **Boost** en la función `scheduler(void)`, en donde inicialmente establecemos la variable  `high_p` para guardar el proceso con mayor prioridad. para luego implementar la lógica `Prioridad += Boost` y si la `Prioridad = 9` entonces `Boost = -1` y si `Prioridad = 0`, entonces `Boost = -1`. (451-499)
+    
     void
         scheduler(void)
         {
@@ -82,13 +83,13 @@
             }
         }
     }
-    ```
+    
    
-4. ### Programa de prueba
-    Para verificar la **prioridad** y el **boost** implementados, se añadieron dos funciones: `getpriority` y `getboost`. Estas funciones permiten visualizar tanto la **prioridad** como el valor del **boost** de cada proceso. A continuación, se detallan los cambios realizados para incluir estas funcionalidades.
+### 4.  Programa de prueba
+Para verificar la **prioridad** y el **boost** implementados, se añadieron dos funciones: `getpriority` y `getboost`. Estas funciones permiten visualizar tanto la **prioridad** como el valor del **boost** de cada proceso. A continuación, se detallan los cambios realizados para incluir estas funcionalidades.
    
-     * ### sysproc.c (38-58)
-        ```
+* ### sysproc.c (38-58)
+        
         uint64
         sys_getpriority(void)
         {
@@ -109,9 +110,9 @@
             return -1;
         return getboost(pid);
         }
-        ```
-     * ### proc.c (538-556)
-        ```
+        
+* ### proc.c (538-556)
+        
         int getpriority(int pid) {
             struct proc *p;
             for(p = proc; p < &proc[NPROC]; p++) {
@@ -131,15 +132,15 @@
             }
             return -1; // Si no se encuentra el proceso
         }
-        ```
-     * ### syscall. (23-24)
-        ```
+        
+* ### syscall. (23-24)
+        
         ...
         #define SYS_getpriority 22
         #define SYS_getboost 23
-        ```
-     * ### syscall.c (104-105, 132-133)
-        ```
+        
+* ### syscall.c (104-105, 132-133)
+       
         ...
         extern uint64 sys_getpriority(void);
         extern uint64 sys_getboost(void);
@@ -152,21 +153,21 @@
         };
         
 
-        ```
-     * ### usys.pl (39-40)
-        ```
+        
+* ### usys.pl (39-40)
+        
         ...
         entry("getpriority");
         entry("getboost");
         ```
-     * ### user.h (44-45)
-        ```
+* ### user.h (44-45)
+        
         ...
         int getpriority(int pid);
         int getboost(int pid);
-        ```
-    Luego en la carpeta `/user` se crea el archivo para crear el programa de pruebas `test_T2.c` con el codigo:
-    ```
+        
+Luego en la carpeta `/user` se crea el archivo para crear el programa de pruebas `test_T2.c` con el codigo:
+    
     #include "kernel/types.h"
     #include "kernel/stat.h"
     #include "user/user.h"
@@ -205,21 +206,21 @@
         
         exit(0);
     }
-    ```
-    Ahora en el archivo `Makefile` (142) se agrega lo siguiente:
-    ```
+
+Ahora en el archivo `Makefile` (142) se agrega lo siguiente:
+
     UPROGS=\
     ...
     $U/_test_T2\
-    ```
-    Finalmente corremos ```XV6```.
-    ```
+    
+Finalmente corremos ```XV6```.
+    
     make clean
     make qemu
     test_T2
-    ```
-    Entregando los siguiente valores:
-    ```
+    
+Entregando los siguiente valores:
+
     xv6 kernel is booting
 
     hart 1 starting
@@ -246,4 +247,12 @@
     Ejecutando proceso hijo 17 con PID 21, Prioridad 0, Boost 1
     Ejecutando proceso hijo 18 con PID 22, Prioridad 1, Boost 1
     Ejecutando proceso hijo 19 con PID 23, Prioridad 2, Boost 1
-    ```
+    
+### 5. Dificultades encontradas y soluciones implementadas.
+*   La principal dificultad radicó en comprender el funcionamiento interno del sistema operativo, específicamente en identificar los archivos y funciones que gestionan la organización de procesos. Esto implicó un análisis detallado de la documentación oficial del sistema, además de realizar búsquedas adicionales en diversas fuentes en internet. Fue necesario entender cómo interactúan los distintos componentes, como las estructuras de datos y las funciones encargadas de la planificación y manejo de los procesos, para poder implementar correctamente las modificaciones requeridas.
+
+*   Otra dificultad fue desarrollar la lógica para implementar el manejo de **PrioridaFinalmente, la implementacion de funciones y de el programa de prueba no fue un proceso que genere dificultad ya que es un proceso que se hizo en la tarea anterior, por lo que fue relativamente sensilla la implementacion de estos.d** y **Boost** según lo propuesto en esta tarea. En muchas ocasiones, al ejecutar el programa de pruebas, el sistema no respondía adecuadamente o generaba una gran cantidad de caracteres incoherentes. Para abordar este problema, se realizaron diversas pruebas en las que se introdujeron pequeñas modificaciones al código original del **scheduler**, lo que redujo los errores. Además, en el programa de pruebas, se incorporó la instrucción ```sleep(i)```, que ayudó a disminuir aún más los fallos al ejecutar el código, mejorando la estabilidad del sistema durante las pruebas.
+
+*   La última dificultad fue cómo visualizar o verificar los cambios en los valores de **Boost** y **Prioridad** para confirmar si la lógica implementada en el **scheduler** funcionaba correctamente. Para resolver esto, se crearon dos funciones: `getpriority` y `getboost`, que permiten obtener y mostrar en consola estos valores para cada proceso. Esto facilitó la verificación visual del correcto funcionamiento de la lógica solicitada en la tarea. ultima dificultad encontrada fue saber o de algun modo visualizar los cambio de **boost** y **prioridad** para de alguna forma saber si se hizo bien la logica implementada en en **scheduler**, y para eso se hicieron dos funciones `getprority` y `getboost` para obtener y mostrar en consola ambos datos para cada proceso y de esta forma verificar vizulamente el funcionamiento correcto de lo que se pidio en la tarea
+
+*   Finalmente, la implementación de las  `getpriority`, `getboost` y del programa de prueba `test_T2` no representó una gran dificultad, ya que este proceso fue realizado en la tarea anterior. Por lo tanto, la implementación resultó ser relativamente sencilla en esta ocasión.
