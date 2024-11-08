@@ -5,7 +5,80 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "spinlock.h" // Asegurarse de incluir spinlock.h
+#include "proc.h"
 
+int
+mprotect(uint64 addr, int len)
+{
+    struct proc *p = myproc();
+    pte_t *pte;
+    uint64 a;
+
+    // Verificar que la dirección esté alineada a una página y que la longitud sea positiva
+    if (addr % PGSIZE != 0 || len <= 0) {
+        printf("mprotect: invalid address or length\n");
+        return -1;
+    }
+
+    // Verificar que la dirección esté dentro del espacio de direcciones del proceso
+    if (addr + len * PGSIZE > p->sz) {
+        printf("mprotect: address out of bounds\n");
+        return -1;
+    }
+
+    for(a = PGROUNDDOWN(addr); a < addr + len * PGSIZE; a += PGSIZE){
+        if((pte = walk(p->pagetable, a, 0)) == 0) {
+            printf("mprotect: walk failed for address 0x%lx\n", a);
+            return -1;
+        }
+        if(!(*pte & PTE_U)) { // Verificar que la página pertenece al usuario
+            printf("mprotect: page not user-accessible for address 0x%lx\n", a);
+            return -1;
+        }
+        *pte &= ~PTE_W; // Deshabilitar el bit de escritura
+        printf("mprotect: write bit disabled for address 0x%lx\n", a);
+    }
+    // Flush the TLB to ensure the changes take effect
+    sfence_vma();
+    return 0;
+}
+
+int
+munprotect(uint64 addr, int len)
+{
+    struct proc *p = myproc();
+    pte_t *pte;
+    uint64 a;
+
+    // Verificar que la dirección esté alineada a una página y que la longitud sea positiva
+    if (addr % PGSIZE != 0 || len <= 0) {
+        printf("munprotect: invalid address or length\n");
+        return -1;
+    }
+
+    // Verificar que la dirección esté dentro del espacio de direcciones del proceso
+    if (addr + len * PGSIZE > p->sz) {
+        printf("munprotect: address out of bounds\n");
+        return -1;
+    }
+
+    for(a = PGROUNDDOWN(addr); a < addr + len * PGSIZE; a += PGSIZE){
+        if((pte = walk(p->pagetable, a, 0)) == 0) {
+            printf("munprotect: walk failed for address 0x%lx\n", a);
+            return -1;
+        }
+        if(!(*pte & PTE_U)) { // Verificar que la página pertenece al usuario
+            printf("munprotect: page not user-accessible for address 0x%lx\n", a);
+            return -1;
+        }
+        *pte |= PTE_W; // Habilitar el bit de escritura
+        printf("munprotect: write bit enabled for address 0x%lx\n", a);
+    }
+    // Flush the TLB to ensure the changes take effect
+    sfence_vma();
+    return 0;
+}
 /*
  * the kernel's page table.
  */
@@ -50,6 +123,7 @@ kvmmake(void)
 }
 
 // Initialize the one kernel_pagetable
+
 void
 kvminit(void)
 {
@@ -449,3 +523,4 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+

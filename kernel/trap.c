@@ -65,9 +65,16 @@ usertrap(void)
     intr_on();
 
     syscall();
-  } else if((which_dev = devintr()) != 0){
+   } else if((which_dev = devintr()) != 0){
     // ok
-  } else {
+   } else if(r_scause() == 0xf) {
+     // Handle store/AMO page fault
+    
+    printf("usertrap: Store/AMO page fault at address 0x%lx\n", r_stval());
+
+    // No terminar el proceso, solo registrar el fallo y continuar
+    p->trapframe->epc += 4;
+   } else {
     printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
     printf("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());
     setkilled(p);

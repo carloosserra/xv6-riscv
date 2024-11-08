@@ -79,6 +79,8 @@ argstr(int n, char *buf, int max)
   return fetchstr(addr, buf, max);
 }
 
+
+
 // Prototypes for the functions that handle system calls.
 extern uint64 sys_fork(void);
 extern uint64 sys_exit(void);
@@ -101,6 +103,8 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
+extern uint64 sys_mprotect(void);
+extern uint64 sys_munprotect(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -126,6 +130,9 @@ static uint64 (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_mprotect] sys_mprotect,
+[SYS_munprotect] sys_munprotect,
+
 };
 
 void
