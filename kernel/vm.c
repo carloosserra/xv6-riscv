@@ -5,7 +5,7 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
-#include "spinlock.h" // Asegurarse de incluir spinlock.h
+#include "spinlock.h" 
 #include "proc.h"
 
 int
@@ -39,7 +39,7 @@ mprotect(uint64 addr, int len)
         *pte &= ~PTE_W; // Deshabilitar el bit de escritura
         printf("mprotect: write bit disabled for address 0x%lx\n", a);
     }
-    // Flush the TLB to ensure the changes take effect
+    
     sfence_vma();
     return 0;
 }
@@ -75,7 +75,7 @@ munprotect(uint64 addr, int len)
         *pte |= PTE_W; // Habilitar el bit de escritura
         printf("munprotect: write bit enabled for address 0x%lx\n", a);
     }
-    // Flush the TLB to ensure the changes take effect
+    
     sfence_vma();
     return 0;
 }

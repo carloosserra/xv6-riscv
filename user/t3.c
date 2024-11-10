@@ -15,10 +15,12 @@ int main(void) {
     // Intentar escribir en la página protegida
     printf("Escribir en la dirección %p\n", addr);  // Verificar el valor
     char *ptr = addr;
-    printf("Valor en la dirección: %d\n", *ptr);
+    printf("dirección antes del intento: %p\n", ptr);
+    printf("Valor antes del intento: %s\n", ptr);
+    
     *ptr = 'A';  // Esto debería fallar si la protección es exitosa
-    printf("Valor en la dirección: %s\n", ptr);  // Verificar el valor
-    printf("Valor en la dirección: %d\n", *ptr);
+    printf("Dirección despues: %p\n", ptr);  // Verificar el valor
+    printf("Valor despues: %s\n", ptr);
 
     // Intentar desproteger la página
     if (munprotect(addr, 1) == -1) {
@@ -29,8 +31,8 @@ int main(void) {
     // Intentar escribir en la página desprotegida
     printf("Escribiendo en la dirección después de desproteger\n");
     *ptr = 'B';  // Esto debería tener éxito si la desprotección es exitosa
-    printf("Valor en la dirección después de desproteger: %s\n", ptr); 
-    printf("Valor en la dirección: %d\n", *ptr); // Verificar el valor
-
+    printf("Dirección despues: %p\n", ptr);  // Verificar la direccion
+    printf("Valor despues: %s\n", ptr); // Verificar el valor
+    
     exit(0);
 }
