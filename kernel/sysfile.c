@@ -321,17 +321,36 @@ sys_open(void)
     if(ip == 0){
       end_op();
       return -1;
-    }
+    }    
   } else {
     if((ip = namei(path)) == 0){
       end_op();
       return -1;
     }
     ilock(ip);
+    // Verificar si el archivo es un directorio y si el modo es incompatible
     if(ip->type == T_DIR && omode != O_RDONLY){
       iunlockput(ip);
       end_op();
       return -1;
+    }
+    if(ip->permissions == 5) {
+      if(omode != O_RDONLY) { // Inmutable solo permite lectura
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
+    } else { // Verificar permisos estándar
+      if((omode & O_WRONLY) && !(ip->permissions & 2)) {
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
+      if((omode & O_RDONLY) && !(ip->permissions & 1)) {
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
     }
   }
 
@@ -358,7 +377,7 @@ sys_open(void)
   }
   f->ip = ip;
   f->readable = !(omode & O_WRONLY);
-  f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+  f->writable = (ip->permissions != 5) && ((omode & O_WRONLY) || (omode & O_RDWR)); // No escribible si es inmutable
 
   if((omode & O_TRUNC) && ip->type == T_FILE){
     itrunc(ip);
@@ -368,6 +387,37 @@ sys_open(void)
   end_op();
 
   return fd;
+}
+
+uint64
+sys_chmod(void)
+{
+  char path[MAXPATH];
+  int mode;
+  struct inode *ip;
+  argint(1, &mode);
+  if(argstr(0, path, MAXPATH) < 0 || mode < 0)
+    return -1;
+
+  begin_op();
+  if((ip = namei(path)) == 0){
+    end_op();
+    return -1;
+  }
+  ilock(ip);
+
+   // Verificar si el archivo es inmutable
+  if(ip->permissions == 5){
+    iunlockput(ip);
+    end_op();
+    return -1; // No se puede cambiar permisos de un archivo inmutable
+  }
+
+  ip->permissions = mode;
+  iupdate(ip);
+  iunlockput(ip);
+  end_op();
+  return 0;
 }
 
 uint64
