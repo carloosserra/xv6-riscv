@@ -4,42 +4,18 @@
 
  ## Documentación Tarea 4
  ## Parte 1
- * ### `file.h` (31) y `fs.h` (39)
+ * ### `file.h` (31)
     Establecemos el campo `permissions` a la estructura `inode` para definir los permisos de acceso al archivo.
-     * `file.h`
+     
 
-        ```c
-        struct inode {
-            ...
-            
-            int permissions;    // Permisos del archivo
-        };
-    * `fs.h`
-        ```c
-        struct dinode {               
-            ...
-            int permissions;    // Permisos del archivo
-            char padding[BSIZE - (sizeof(short) * 4 + sizeof(uint) * (NDIRECT + 2) + sizeof(int))]; // Relleno para alinear a BSIZE
-        };
+   ```c
+   struct inode {
+      ...
+      
+      int permissions;    // Permisos del archivo
+   };
 
- * ### `fs.c` (211)
-    Establecemos el valor inicial para `permissions`de un 
-    ```c
-    struct inode*
-    ialloc(uint dev, short type)
-    {
-     int inum;
-     struct buf *bp;
-     struct dinode *dip;
  
-     for(inum = 1; inum < sb.ninodes; inum++){
-        ...
-        dip->permissions = 3; /
-        ...
-     }   
-     printf("ialloc: no inodes\n");
-     return 0;
-    }
  * ### `sysfile.c` (325-350, 386-408)
 
     Modificamos la función `sys_open` para que verifique los permisos del inode antes de permitir la apertura del archivo
